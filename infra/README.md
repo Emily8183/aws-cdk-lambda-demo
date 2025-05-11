@@ -1,8 +1,9 @@
-# Welcome to your CDK TypeScript project
+# CDK TypeScript project (for the purpose of demo)
 
-This is a blank project for CDK development with TypeScript.
+This repo involves a couple of demo projects for CDK development with TypeScript.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+1/ Lambda API Gateway Stack
+2/ Lambda Function URL demo
 
 ## Useful commands
 
