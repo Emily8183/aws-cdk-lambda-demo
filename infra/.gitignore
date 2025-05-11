@@ -1,0 +1,34 @@
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# TypeScript
+dist/
+*.tsbuildinfo
+*.js
+*.d.ts
+!jest.config.js
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cdk.context.json
+
+# Local environment
+.env
+.env.*
+*.log
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# OS-generated
+.DS_Store
+Thumbs.db
+
+# Security: do not commit AWS credentials
+.aws/
+.credentials
+
