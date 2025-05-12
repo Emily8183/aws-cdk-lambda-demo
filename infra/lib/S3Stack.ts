@@ -3,6 +3,7 @@ import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 
 export class S3Stack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,5 +38,20 @@ export class S3Stack extends cdk.Stack {
         role: iambalancestatusrole,
       }
     );
+
+    //api gateway
+    const bankingrestapi = new apigateway.LambdaRestApi(
+      this,
+      "bankingrestapi",
+      {
+        handler: bankingLambdafunction,
+        restApiName: "bankingrestapi",
+        deploy: true, //为这个api创建一个部署（即生成一个URL)
+        proxy: false, //自己定义每个 path
+      }
+    );
+
+    const bankstatus = bankingrestapi.root.addResource("bankstatus");
+    bankstatus.addMethod("GET");
   }
 }
