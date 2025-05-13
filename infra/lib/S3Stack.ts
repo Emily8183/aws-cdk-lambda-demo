@@ -1,3 +1,5 @@
+//demo using API gateway to invoke a lambda function that reads data from S3
+
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
