@@ -4,6 +4,9 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as s3n from "aws-cdk-lib/aws-s3-notifications";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class S3triggerlambdawritesdb extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -29,11 +32,34 @@ export class S3triggerlambdawritesdb extends cdk.Stack {
 
     //lambda function
     const retaillambda = new lambda.Function(this, "retaillambdalogicalid", {
-      handler: "lambda_sample3.py",
+      handler: "lambda_sample3.lambda_handler",
       runtime: lambda.Runtime.PYTHON_3_9,
       code: lambda.Code.fromAsset("../services/"),
       role: retailfeediamrole,
+      functionName: "demos3triggerlambdawritesdb",
     });
-    retaillambda.node.addDependency(retailfeediamrole); //？？？ stackA.node.addDependency(stackB) method
+
+    // stackA.node.addDependency(stackB) method
+    retaillambda.node.addDependency(retailfeediamrole); //dependency of the lambda function on the IAM role？
+
+    //s3bucket
+    const retails3bucket = new s3.Bucket(this, "retailbucketlogicalid", {
+      bucketName: "retailfeeds3bucket",
+    });
+
+    // //s3 event notification (any updates in S3 will invoke lambda function)
+    retails3bucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(retaillambda)
+    );
+
+    // //dynamodb
+    // const retaildynamodb = new dynamodb.Table(this, "dynamodblogicalid", {
+    //   tableName: "retaildynamodbtable",
+    //   partitionKey: {
+    //     name: "customername",
+    //     type: dynamodb.AttributeType.STRING,
+    //   },
+    // });
   }
 }

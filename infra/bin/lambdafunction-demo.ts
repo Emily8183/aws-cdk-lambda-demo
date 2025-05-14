@@ -17,4 +17,4 @@ const app = new cdk.App();
 // new S3Stack(app, "Bankingstatusapp", {});
 
 // Sample4: demo using s3 invoke a lambda function then writes in DynamoDB
-new S3triggerlambdawritesdb(app, "RetailInfraStack", {});
+new S3triggerlambdawritesdb(app, "RetailInfraStack", {}); //{}说明不限制部署区域 (test和production的env设置有区别)
