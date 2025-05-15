@@ -44,7 +44,7 @@ export class S3triggerlambdawritesdb extends cdk.Stack {
 
     //s3bucket
     const retails3bucket = new s3.Bucket(this, "retailbucketlogicalid", {
-      bucketName: "retailfeeds3bucket",
+      bucketName: "retailfeeds3bucket514",
     });
 
     // //s3 event notification (any updates in S3 will invoke lambda function)
@@ -53,13 +53,13 @@ export class S3triggerlambdawritesdb extends cdk.Stack {
       new s3n.LambdaDestination(retaillambda)
     );
 
-    // //dynamodb
-    // const retaildynamodb = new dynamodb.Table(this, "dynamodblogicalid", {
-    //   tableName: "retaildynamodbtable",
-    //   partitionKey: {
-    //     name: "customername",
-    //     type: dynamodb.AttributeType.STRING,
-    //   },
-    // });
+    //dynamodb
+    const retaildynamodb = new dynamodb.Table(this, "dynamodblogicalid", {
+      tableName: "retaildynamodbtable",
+      partitionKey: {
+        name: "customername",
+        type: dynamodb.AttributeType.STRING,
+      },
+    });
   }
 }
