@@ -5,12 +5,21 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 
 export class TodolistStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    //创建 API Gateway (RestApi)
+    //create Lambda function
+    const todosLambda = new lambda.Function(this, "TodoListHandler", {
+      functionName: "TodosLambda",
+      handler: "lambda_todolist.lambda_handler",
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset("../services/"),
+    });
+
+    //create API Gateway (RestApi)
     const todolistrestapi = new apigateway.RestApi(this, "TodosApi", {
       restApiName: "TodosAPI",
       defaultCorsPreflightOptions: {
