@@ -35,6 +35,8 @@ export class TodolistStack extends cdk.Stack {
     });
 
     const todos = todolistrestapi.root.addResource("todos");
+
+    //InvokeFunction(不需要自己手动添加权限), 将lambda:InvokeFunction 加到 Lambda 的 Resource Policy 上
     todos.addMethod("GET", new apigateway.LambdaIntegration(todosLambda)); //get所有todo
     todos.addMethod("POST", new apigateway.LambdaIntegration(todosLambda)); //post一个todo
 
