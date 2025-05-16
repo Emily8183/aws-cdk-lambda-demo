@@ -40,7 +40,7 @@ export class S3triggerlambdawritesdb extends cdk.Stack {
     });
 
     // stackA.node.addDependency(stackB) method
-    retaillambda.node.addDependency(retailfeediamrole); //dependency of the lambda function on the IAM role？
+    retaillambda.node.addDependency(retailfeediamrole); //dependency of the lambda function on the IAM role, unnecessary here!
 
     //s3bucket
     const retails3bucket = new s3.Bucket(this, "retailbucketlogicalid", {

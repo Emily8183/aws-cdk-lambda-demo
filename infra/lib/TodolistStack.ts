@@ -34,6 +34,7 @@ export class TodolistStack extends cdk.Stack {
       handler: "lambda_todolist.lambda_handler",
       runtime: lambda.Runtime.PYTHON_3_9,
       code: lambda.Code.fromAsset("../services/"),
+      role: todostableiamrole,
     });
 
     //create API Gateway (RestApi)
@@ -51,7 +52,7 @@ export class TodolistStack extends cdk.Stack {
       // }
     });
 
-    const todos = todolistrestapi.root.addResource("todos");
+    const todos = todolistrestapi.root.addResource("todos"); //Authentication Token
 
     //InvokeFunction(不需要自己手动添加权限), 将lambda:InvokeFunction 加到 Lambda 的 Resource Policy 上
     todos.addMethod("GET", new apigateway.LambdaIntegration(todosLambda)); //get所有todo

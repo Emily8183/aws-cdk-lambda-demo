@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     data_byte = response['Body'].read()
   # convert from bytes to strings
     data_string = data_byte.decode("UTF-8")
-   # convert from json string to dictionary
+  # convert from json string to dictionary
     data_dict = json.loads(data_string)
 
     return {
