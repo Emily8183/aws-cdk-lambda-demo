@@ -6,6 +6,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class TodolistStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -46,5 +47,15 @@ export class TodolistStack extends cdk.Stack {
       "DELETE",
       new apigateway.LambdaIntegration(todosLambda)
     ); //删除
+
+    //dynamodb
+    const todolistTable = new dynamodb.Table(this, "todostablelogicalid", {
+      tableName: "TodosTable",
+      partitionKey: {
+        name: "task_id", //类似sql中的primary key
+        type: dynamodb.AttributeType.NUMBER,
+      },
+      removalPolicy: cdk.RemovalPolicy.DESTROY, //NOTICE: only for this demo project. Usually keep tables
+    });
   }
 }
