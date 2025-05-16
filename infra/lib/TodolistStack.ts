@@ -7,10 +7,26 @@ import { Construct } from "constructs";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class TodolistStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    //IAM role
+    const todostableiamrole = new iam.Role(this, "todoslistiamlogicalid", {
+      roleName: "todolistlambdarole",
+      description: "role for lambda service to access dynamoDB",
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"), //允许lambda函数访问这些资源
+    });
+
+    //add Managed Policy (Lambda 拥有了对所有 S3 bucket 的完整访问权限）
+    todostableiamrole.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess") //allow to access DynamoDB
+    );
+    todostableiamrole.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchFullAccess") //allow to access Cloudwatch, 出错时可以查看错误栈
+    );
 
     //create Lambda function
     const todosLambda = new lambda.Function(this, "TodoListHandler", {
