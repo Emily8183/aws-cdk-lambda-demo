@@ -1,4 +1,4 @@
-//demo using API gateway to invoke a lambda function that reads data from S3
+//demo using API gateway(LambdaRestApi) to invoke a lambda function that reads data from S3
 
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
@@ -41,15 +41,15 @@ export class S3Stack extends cdk.Stack {
       }
     );
 
-    //api gateway
-    const bankingrestapi = new apigateway.LambdaRestApi(
+    //LambdaRestApi
+    const bankingrestapi = new apigateway.LambdaRestApi( //不好做权限控制和跨域配置（CORS）
       this,
       "bankingrestapi",
       {
         handler: bankingLambdafunction,
         restApiName: "bankingrestapi",
         deploy: true, //为这个api创建一个部署（即生成一个URL)
-        proxy: false, //自己定义每个 path
+        proxy: false, //false: 手动添加 .addResource() 路径; true: 所有请求(例如POST, GET）都进入同一个 Lambda
       }
     );
 
