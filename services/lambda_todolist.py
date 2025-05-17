@@ -36,11 +36,11 @@ def lambda_handler(event, context):
         except Exception as e:
             print("Error scanning table:", str(e))
 
+    #先从http接收到的json字符串，通过json.loads转成python dict
+    body = json.loads(event.get('body', '{}'))       
+
     if method == 'POST':
         try:
-            #先从http接收到的json字符串，通过json.loads转成python dict
-            body = json.loads(event.get('body', '{}')) 
-
             todoitem = {
                 "task_id": int(time.time()), #以后应该创建成string, 用UUID
                 "task": body.get("task", ""),
@@ -60,9 +60,43 @@ def lambda_handler(event, context):
                 "statusCode": 500,
                 "body": json.dumps({ "error": str(e) })
             }
+        
+    if method == "PUT":
+        task_id = body.get("task_id")
+        new_task = body.get("task")
+        new_status = body.get("status")
+
+        # if not task_id:
+        #     return {"statusCode": 400, "body": "task_id is required"}
+
+        table.update_item(
+            Key={"task_id": task_id},
+            UpdateExpression="SET task = :t, #completed = :s",
+            ExpressionAttributeNames={
+                "#completed": "status"
+            },
+            ExpressionAttributeValues={
+                ":t": new_task,
+                ":s": new_status
+            }
+        )
+
+        #double check the updated task, if no issues, can send back to the frontend
+        updated_item = table.get_item(Key={"task_id": task_id}).get('Item')
+
+        return {
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(updated_item)
+        }
+
 
     return {
         "statusCode": 400,
         "body": "Unsupported method"
     }
+
+    
+
+    
     

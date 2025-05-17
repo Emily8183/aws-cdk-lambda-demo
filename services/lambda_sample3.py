@@ -9,15 +9,19 @@ def lambda_handler(event, context):
         Key='cdktestfile.json',
 )
 
-# convert data into a dict so we can insert it into a table
-# convert from streaming data to byte
-    json_data = response['Body'].read()
+    # convert data into a dict so we can insert it into a table
+    # convert from streaming data to byte
+
+    json_data = response['Body'].read() #从S3获取的是bytes数据
     #print(json_data)
     #print(type(json_data))
-    #convert data from byte to string
-    data_string = json_data.decode('UTF-8')
+
+    #convert data from byte字节数据 to string
+    data_string = json_data.decode('UTF-8') 
+
     #print(data_string)
     #print(type(data_string))
+
     # convert from json string to dictionary
     data_dict =json.loads(data_string)
     # print(data_dict)
