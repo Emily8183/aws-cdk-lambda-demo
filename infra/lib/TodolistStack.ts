@@ -69,6 +69,7 @@ export class TodolistStack extends cdk.Stack {
     const todolistTable = new dynamodb.Table(this, "todostablelogicalid", {
       tableName: "TodosTable",
       partitionKey: {
+        //Cannot change the partition key once the table is created
         name: "task_id", //类似sql中的primary key
         type: dynamodb.AttributeType.NUMBER,
       },
