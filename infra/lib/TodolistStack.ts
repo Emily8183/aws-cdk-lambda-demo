@@ -40,10 +40,10 @@ export class TodolistStack extends cdk.Stack {
     //create API Gateway (RestApi)
     const todolistrestapi = new apigateway.RestApi(this, "TodosApi", {
       restApiName: "TodosAPI",
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-      },
+      // defaultCorsPreflightOptions: {
+      //   allowOrigins: apigateway.Cors.ALL_ORIGINS,
+      //   allowMethods: apigateway.Cors.ALL_METHODS,
+      // },
 
       // defaultCorsPreflightOptions: {
       //   allowOrigins: ['https://frontend.netlify.app'],
@@ -52,17 +52,43 @@ export class TodolistStack extends cdk.Stack {
       // }
     });
 
+    const apiKey = todolistrestapi.addApiKey("TodoApiKey");
+
+    const usagePlan = todolistrestapi.addUsagePlan("TodoUsagePlan", {
+      name: "EmilyTodoUsagePlan",
+      apiStages: [
+        {
+          api: todolistrestapi,
+          stage: todolistrestapi.deploymentStage,
+        },
+      ],
+    });
+
+    usagePlan.addApiKey(apiKey);
+
     const todos = todolistrestapi.root.addResource("todos"); //Authentication Token
 
     //InvokeFunction(不需要自己手动添加权限), 将lambda:InvokeFunction 加到 Lambda 的 Resource Policy 上
-    todos.addMethod("GET", new apigateway.LambdaIntegration(todosLambda)); //get所有todo
-    todos.addMethod("POST", new apigateway.LambdaIntegration(todosLambda)); //post一个todo
+    todos.addMethod("GET", new apigateway.LambdaIntegration(todosLambda), {
+      apiKeyRequired: true,
+    }); //get所有todo
+
+    todos.addMethod("POST", new apigateway.LambdaIntegration(todosLambda), {
+      apiKeyRequired: true,
+    }); //post一个todo
 
     const singleTodo = todos.addResource("{id}");
-    singleTodo.addMethod("PUT", new apigateway.LambdaIntegration(todosLambda)); //更新或替换
+
+    singleTodo.addMethod("PUT", new apigateway.LambdaIntegration(todosLambda), {
+      apiKeyRequired: true,
+    }); //更新或替换
+
     singleTodo.addMethod(
       "DELETE",
-      new apigateway.LambdaIntegration(todosLambda)
+      new apigateway.LambdaIntegration(todosLambda),
+      {
+        apiKeyRequired: true,
+      }
     ); //删除
 
     //dynamodb
