@@ -5,6 +5,7 @@ import { LambdaApiGatewayStack } from "../lib/LambdaApiGatewayStack";
 import { S3Stack } from "../lib/S3Stack";
 import { S3triggerlambdawritesdb } from "../lib/S3triggerlambdawritesdb";
 import { TodolistStack } from "../lib/TodolistStack";
+import { ProxyStack } from "../lib/ProxyStack";
 
 const app = new cdk.App();
 // Sample1: launch a lambda function which can be visited by URL
@@ -22,3 +23,4 @@ const app = new cdk.App();
 
 // Sample5: full-stack to-do-list demo project to parse data
 new TodolistStack(app, "TodolistStack", {});
+new ProxyStack(app, "ProxyStack", {});

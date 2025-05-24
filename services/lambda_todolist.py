@@ -12,7 +12,7 @@ def build_response(status_code, body):
         "statusCode": status_code,
         "headers": {
             "Content-Type": "application/json", #告诉浏览器返回的是.json
-            "Access-Control-Allow-Origin": "https://react-mini-todolist.netlify.app/", #TODO: website to be added 
+            "Access-Control-Allow-Origin": "https://react-mini-todolist.netlify.app/", 
             "Access-Control-Allow-Headers": "Content-Type,x-api-key",
             "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS"
         },
