@@ -7,6 +7,17 @@ from boto3.dynamodb.conditions import Attr #not as efficient as Query
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table("TodosTable") #直接引用
 
+def build_response(status_code, body):
+    return {
+        "statusCode": status_code,
+        "headers": {
+            "Content-Type": "application/json", #告诉浏览器返回的是.json
+            "Access-Control-Allow-Origin": "https://react-mini-todolist.netlify.app/", #TODO: website to be added 
+            "Access-Control-Allow-Headers": "Content-Type,x-api-key",
+            "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS"
+        },
+        "body": json.dumps(body, default=str) # default=str: convert the Decimal type
+    }
 
 def lambda_handler(event, context):
 
@@ -25,40 +36,22 @@ def lambda_handler(event, context):
 
     method = event["httpMethod"]
 
-    #TODO: add a helper function for headers
-    #TODO: use query() instead of FilterExpression
-
     #OPTIONS:
     if method == 'OPTIONS':
-        return {
-            "statusCode": 200,
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "x-api-key, Content-Type",
-                "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS"
-            },
-            "body": json.dumps("OK")
-        }
+        return build_response(200, "CORS preflight passed")
 
 
     # GET: passed test in postman
     if method == 'GET':
         try:
-            response = table.scan( 
+            response = table.scan( #TODO: use query() instead of FilterExpression
                 FilterExpression=Attr("status").eq(False) #scan first, then filter
             ) 
             items = response.get("Items",[]) #if nothing received, return []
-            return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json", #告诉浏览器返回的是.json
-                            "Access-Control-Allow-Origin": "*", 
-                            "Access-Control-Allow-Headers": "x-api-key",
-                            "Access-Control-Allow-Methods": "GET" #OPTIONS to support "preflight request"???
-                           }, 
-                "body": json.dumps(items, default=str) # default=str: convert the Decimal type
-            }
+            return build_response(200, items)
         except Exception as e:
             print("Error scanning table:", str(e))
+            return build_response(500, {"error": str(e)})
 
     #先从http接收到的json字符串，通过json.loads转成python dict
     body = json.loads(event.get('body', '{}'))       
@@ -73,21 +66,10 @@ def lambda_handler(event, context):
 
             table.put_item(Item=todoitem)
 
-            return {
-                "statusCode": 201,
-                "headers": { "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*", 
-                            "Access-Control-Allow-Headers": "x-api-key",
-                            "Access-Control-Allow-Methods": "POST"
-                            },
-                "body": json.dumps(todoitem)
-            }
-
+            return build_response(201, todoitem)
+        
         except Exception as e:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({ "error": str(e) })
-            }
+            return build_response(500, {"error": str(e)})
         
     if method == "PUT":
         task_id = body.get("task_id")
@@ -109,19 +91,10 @@ def lambda_handler(event, context):
             }
         )
 
-
         #double check the updated task, if no issues, can send back to the frontend
         updated_item = table.get_item(Key={"task_id": task_id}).get('Item')
 
-        return {
-                "statusCode": 200,
-                "headers": {"Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*", 
-                            "Access-Control-Allow-Headers": "x-api-key",
-                            "Access-Control-Allow-Methods": "PUT"
-                            },
-                "body": json.dumps(updated_item, default=str)
-        }
+        return build_response(200,updated_item)
 
     if method == "DELETE":
         task_id = body.get("task_id") #note the task_id is in integer type here
@@ -134,22 +107,10 @@ def lambda_handler(event, context):
 
         table.delete_item(Key={"task_id": task_id})
 
-        return {
-            "statusCode": 200,
-            "headers": { "Content-Type": "application/json",
-                         "Access-Control-Allow-Origin": "*", 
-                         "Access-Control-Allow-Headers": "x-api-key",
-                         "Access-Control-Allow-Methods": "DELETE"
-                        }, #表示这是一个 JSON 对象
-            "body": json.dumps({"message": f"Task {task_id} deleted"})
-        }
+        return build_response(200, {"message": "Deleted"})
 
     return {
         "statusCode": 400,
         "body": "Unsupported method"
     }
-
-    
-
-    
     
