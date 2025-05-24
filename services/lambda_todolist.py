@@ -23,6 +23,21 @@ def lambda_handler(event, context):
 
     method = event["httpMethod"]
 
+    #TODO: add a helper function for headers
+
+    #OPTIONS:
+    if method == 'OPTIONS':
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "x-api-key, Content-Type",
+                "Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS"
+            },
+            "body": json.dumps("OK")
+        }
+
+
     # GET: passed test in postman
     if method == 'GET':
         try:
@@ -30,8 +45,12 @@ def lambda_handler(event, context):
             items = response.get("Items",[]) #if nothing received, return []
             return {
                 "statusCode": 200,
-                "headers": {"Content-Type": "application/json"}, #告诉浏览器返回的是.json
-                "body": json.dumps(items, default=str)
+                "headers": {"Content-Type": "application/json", #告诉浏览器返回的是.json
+                            "Access-Control-Allow-Origin": "*", 
+                            "Access-Control-Allow-Headers": "x-api-key",
+                            "Access-Control-Allow-Methods": "GET" #OPTIONS to support "preflight request"???
+                           }, 
+                "body": json.dumps(items, default=str) # default=str: convert the Decimal type
             }
         except Exception as e:
             print("Error scanning table:", str(e))
@@ -51,7 +70,11 @@ def lambda_handler(event, context):
 
             return {
                 "statusCode": 201,
-                "headers": { "Content-Type": "application/json" },
+                "headers": { "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*", 
+                            "Access-Control-Allow-Headers": "x-api-key",
+                            "Access-Control-Allow-Methods": "POST"
+                            },
                 "body": json.dumps(todoitem)
             }
 
@@ -71,7 +94,7 @@ def lambda_handler(event, context):
 
         table.update_item(
             Key={"task_id": task_id},
-            UpdateExpression="SET task = :t, #completed = :s",
+            UpdateExpression="SET task = :t, #completed = :s", # set alias by using #completed, to represent "status" in the DynamoDB
             ExpressionAttributeNames={
                 "#completed": "status"
             },
@@ -81,15 +104,40 @@ def lambda_handler(event, context):
             }
         )
 
+
         #double check the updated task, if no issues, can send back to the frontend
         updated_item = table.get_item(Key={"task_id": task_id}).get('Item')
 
         return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(updated_item)
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*", 
+                            "Access-Control-Allow-Headers": "x-api-key",
+                            "Access-Control-Allow-Methods": "PUT"
+                            },
+                "body": json.dumps(updated_item, default=str)
         }
 
+    if method == "DELETE":
+        task_id = body.get("task_id") #note the task_id is in integer type here
+
+        # if not task_id:
+        #     return {
+        #         "statusCode": 400,
+        #         "body": "Missing task_id"
+        #     }
+
+        table.delete_item(Key={"task_id": task_id})
+
+        return {
+            "statusCode": 200,
+            "headers": { "Content-Type": "application/json",
+                         "Access-Control-Allow-Origin": "*", 
+                         "Access-Control-Allow-Headers": "x-api-key",
+                         "Access-Control-Allow-Methods": "DELETE"
+                        }, #表示这是一个 JSON 对象
+            "body": json.dumps({"message": f"Task {task_id} deleted"})
+        }
 
     return {
         "statusCode": 400,

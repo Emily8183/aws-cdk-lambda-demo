@@ -52,7 +52,9 @@ export class TodolistStack extends cdk.Stack {
       // }
     });
 
-    const apiKey = todolistrestapi.addApiKey("TodoApiKey");
+    const apiKey = todolistrestapi.addApiKey("TodoApiKey", {
+      apiKeyName: "MyTodoAppKey",
+    });
 
     const usagePlan = todolistrestapi.addUsagePlan("TodoUsagePlan", {
       name: "EmilyTodoUsagePlan",
