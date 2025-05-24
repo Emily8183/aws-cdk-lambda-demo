@@ -1,6 +1,8 @@
 import json
 import boto3
 import time  # 用来生成Task_id，模拟时间戳
+from boto3.dynamodb.conditions import Attr #not as efficient as Query
+
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table("TodosTable") #直接引用
@@ -24,6 +26,7 @@ def lambda_handler(event, context):
     method = event["httpMethod"]
 
     #TODO: add a helper function for headers
+    #TODO: use query() instead of FilterExpression
 
     #OPTIONS:
     if method == 'OPTIONS':
@@ -41,7 +44,9 @@ def lambda_handler(event, context):
     # GET: passed test in postman
     if method == 'GET':
         try:
-            response = table.scan() # 对整个TodoTable做一次全表扫描（Scan），返回所有的 todo 项目
+            response = table.scan( 
+                FilterExpression=Attr("status").eq(False) #scan first, then filter
+            ) 
             items = response.get("Items",[]) #if nothing received, return []
             return {
                 "statusCode": 200,
