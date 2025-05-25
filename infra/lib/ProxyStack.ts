@@ -20,7 +20,7 @@ export class ProxyStack extends cdk.Stack {
         "service-role/AWSLambdaBasicExecutionRole"
       )
     );
-
+    b;
     // Add SSM read permission
     proxyLambdaRole.addToPolicy(
       new iam.PolicyStatement({
