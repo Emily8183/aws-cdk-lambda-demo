@@ -8,8 +8,13 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as ssm from "aws-cdk-lib/aws-ssm"; //Parameter Store
+import * as crypto from "crypto";
 
 export class TodolistStack extends cdk.Stack {
+  public readonly apiUrlOutput: string;
+  public readonly apiKeyOutput: string;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -20,7 +25,7 @@ export class TodolistStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"), //允许lambda函数访问这些资源
     });
 
-    //add Managed Policy (Lambda 拥有了对所有 S3 bucket 的完整访问权限）
+    //add Managed Policy
     todostableiamrole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonDynamoDBFullAccess") //allow to access DynamoDB
     );
@@ -40,20 +45,36 @@ export class TodolistStack extends cdk.Stack {
     //create API Gateway (RestApi)
     const todolistrestapi = new apigateway.RestApi(this, "TodosApi", {
       restApiName: "TodosAPI",
-      // defaultCorsPreflightOptions: {
-      //   allowOrigins: apigateway.Cors.ALL_ORIGINS,
-      //   allowMethods: apigateway.Cors.ALL_METHODS,
-      // },
-
-      // defaultCorsPreflightOptions: {
-      //   allowOrigins: ['https://frontend.netlify.app'],
-      //   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-      //   allowHeaders: ['Content-Type'],
-      // }
+      deployOptions: {
+        stageName: "prod",
+      },
     });
 
-    const apiKey = todolistrestapi.addApiKey("TodoApiKey", {
-      apiKeyName: "MyTodoAppKey",
+    // const apiKey = todolistrestapi.addApiKey("TodoApiKey", {
+    //   apiKeyName: "MyTodoAppKey",
+    // });
+
+    //TODO: having an issue that can only write api-key, but can't read
+    const apiKey = new apigateway.ApiKey(this, "RealApiKey", {
+      apiKeyName: "real-api-key",
+      description: "The real API key for the todoAPI",
+      enabled: true,
+    });
+
+    // add the real URL and API Key to the SSM Parameter Store
+    // key-value pair
+    new ssm.StringParameter(this, "RealApiUrlParam", {
+      parameterName: "/todolist/api/url", //key
+      stringValue: todolistrestapi.url, //value
+    });
+
+    // Issue: 在 CDK 中，keyValue 只在创建 ApiKey 的那一刻通过构造函数 new ApiKey(...) 提供一次。之后就无法通过 .keyValue 再访问它了
+    // Solution: manually generate a random API Key value through crypto
+    const apiKeyValue = crypto.randomBytes(16).toString("hex");
+
+    new ssm.StringParameter(this, "RealApiKeyParam", {
+      parameterName: "/todolist/api/key",
+      stringValue: apiKey.keyArn,
     });
 
     const usagePlan = todolistrestapi.addUsagePlan("TodoUsagePlan", {

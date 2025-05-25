@@ -3,18 +3,15 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as dotenv from "dotenv";
 
 export class ProxyStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    dotenv.config();
-
     //iam role
     const proxyLambdaRole = new iam.Role(this, "ProxyLambdaRole", {
       roleName: "proxylambdarole",
-      description: "role for lambda service to access lambda_todolist",
+      description: "Role for proxy lambda to access SSM",
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
 
@@ -24,16 +21,22 @@ export class ProxyStack extends cdk.Stack {
       )
     );
 
+    // Add SSM read permission
+    proxyLambdaRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/todolist/api/*`,
+        ],
+      })
+    );
+
     //lambda function
     const proxyLambda = new lambda.Function(this, "ProxyLambda", {
       functionName: "ProxyLambda",
       handler: "lambda_proxy.lambda_handler",
       runtime: lambda.Runtime.PYTHON_3_9,
       code: lambda.Code.fromAsset("../services/"),
-      environment: {
-        REAL_API_URL: process.env.REAL_API_URL!,
-        REAL_API_KEY: process.env.REAL_API_KEY!,
-      },
       role: proxyLambdaRole,
     });
 
