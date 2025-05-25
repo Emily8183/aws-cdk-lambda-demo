@@ -24,6 +24,15 @@ export class ProxyStack extends cdk.Stack {
       )
     );
 
+    proxyLambdaRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter"],
+        resources: [
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/todolist/api/*`,
+        ],
+      })
+    );
+
     //lambda function
     const proxyLambda = new lambda.Function(this, "ProxyLambda", {
       functionName: "ProxyLambda",

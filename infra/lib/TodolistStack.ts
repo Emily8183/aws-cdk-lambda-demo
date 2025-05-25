@@ -40,16 +40,15 @@ export class TodolistStack extends cdk.Stack {
     //create API Gateway (RestApi)
     const todolistrestapi = new apigateway.RestApi(this, "TodosApi", {
       restApiName: "TodosAPI",
-      // defaultCorsPreflightOptions: {
-      //   allowOrigins: apigateway.Cors.ALL_ORIGINS,
-      //   allowMethods: apigateway.Cors.ALL_METHODS,
-      // },
-
-      // defaultCorsPreflightOptions: {
-      //   allowOrigins: ['https://frontend.netlify.app'],
-      //   allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-      //   allowHeaders: ['Content-Type'],
-      // }
+      defaultCorsPreflightOptions: {
+        // allowOrigins: [
+        //   "http://localhost:5173",
+        //   "https://react-mini-todolist.netlify.app",
+        // ],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS, // CDK中设置CORS（属于API Gateway层）
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ["Content-Type", "x-api-key"],
+      },
     });
 
     const apiKey = todolistrestapi.addApiKey("TodoApiKey", {
@@ -78,6 +77,11 @@ export class TodolistStack extends cdk.Stack {
     todos.addMethod("POST", new apigateway.LambdaIntegration(todosLambda), {
       apiKeyRequired: true,
     }); //post一个todo
+
+    // todos.addMethod("OPTIONS", new apigateway.MockIntegration(...), {
+    //   methodResponses: [...],
+    //   apiKeyRequired: false,
+    // });
 
     const singleTodo = todos.addResource("{id}");
 

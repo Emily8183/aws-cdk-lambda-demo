@@ -12,9 +12,9 @@ def build_response(status_code, body):
         "statusCode": status_code,
         "headers": {
             "Content-Type": "application/json", #告诉浏览器返回的是.json
-            "Access-Control-Allow-Origin": "https://react-mini-todolist.netlify.app/", 
+            "Access-Control-Allow-Origin": "http://localhost:5173", #lambda函数中返回的headers
             "Access-Control-Allow-Headers": "Content-Type,x-api-key",
-            "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS"
+            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,OPTIONS"
         },
         "body": json.dumps(body, default=str) # default=str: convert the Decimal type
     }
@@ -43,6 +43,7 @@ def lambda_handler(event, context):
 
     # GET: passed test in postman
     if method == 'GET':
+        # return "123"
         try:
             response = table.scan( #TODO: use query() instead of FilterExpression
                 FilterExpression=Attr("status").eq(False) #scan first, then filter
@@ -72,7 +73,7 @@ def lambda_handler(event, context):
             return build_response(500, {"error": str(e)})
         
     if method == "PUT":
-        task_id = body.get("task_id")
+        task_id = int(body.get("task_id")) #Integer type
         new_task = body.get("task")
         new_status = body.get("status")
 
@@ -97,7 +98,7 @@ def lambda_handler(event, context):
         return build_response(200,updated_item)
 
     if method == "DELETE":
-        task_id = body.get("task_id") #note the task_id is in integer type here
+        task_id = int(event["pathParameters"]["id"]) #note the task_id is in integer type here
 
         # if not task_id:
         #     return {
@@ -109,8 +110,5 @@ def lambda_handler(event, context):
 
         return build_response(200, {"message": "Deleted"})
 
-    return {
-        "statusCode": 400,
-        "body": "Unsupported method"
-    }
-    
+    return build_response(400, {"error": "Unsupported method"})
+
