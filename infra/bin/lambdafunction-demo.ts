@@ -5,7 +5,8 @@ import { LambdaApiGatewayStack } from "../lib/LambdaApiGatewayStack";
 import { S3Stack } from "../lib/S3Stack";
 import { S3triggerlambdawritesdb } from "../lib/S3triggerlambdawritesdb";
 import { TodolistStack } from "../lib/TodolistStack";
-// import { ProxyStack } from "../lib/ProxyStack";
+import { ProxyStack } from "../lib/ProxyStack";
+import { CdkStackForJavaLambda } from "../lib/CdkStackForJavaLambda";
 
 const app = new cdk.App();
 // Sample1: launch a lambda function which can be visited by URL
@@ -22,7 +23,10 @@ const app = new cdk.App();
 // new S3triggerlambdawritesdb(app, "RetailInfraStack", {}); //{}说明不限制部署区域 (test和production的env设置有区别)
 
 // Sample5: full-stack to-do-list demo project to parse data
-new TodolistStack(app, "TodolistStack", {});
+// new TodolistStack(app, "TodolistStack", {});
+
+// Sample6: call a java-based Lambda by cdk
+new CdkStackForJavaLambda(app, "CdkStackForJavaLambda", {});
 
 //ProxyStack hasn't completed
 // new ProxyStack(app, "ProxyStack", {});
