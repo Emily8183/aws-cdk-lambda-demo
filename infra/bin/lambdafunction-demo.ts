@@ -7,6 +7,7 @@ import { S3triggerlambdawritesdb } from "../lib/S3triggerlambdawritesdb";
 import { TodolistStack } from "../lib/TodolistStack";
 import { ProxyStack } from "../lib/ProxyStack";
 import { CdkStackForJavaLambda } from "../lib/CdkStackForJavaLambda";
+import {CodepipelineStack} from "../lib/CodepipelineStack";
 
 const app = new cdk.App();
 // Sample1: launch a lambda function which can be visited by URL
@@ -26,7 +27,10 @@ const app = new cdk.App();
 // new TodolistStack(app, "TodolistStack", {});
 
 // Sample6: call a java-based Lambda by cdk
-new CdkStackForJavaLambda(app, "CdkStackForJavaLambda", {});
+// new CdkStackForJavaLambda(app, "CdkStackForJavaLambda", {});
 
 //ProxyStack hasn't completed
 // new ProxyStack(app, "ProxyStack", {});
+
+// Sample7: codepipeline
+ new CodepipelineStack(app, "CodepipelineStack", {});
