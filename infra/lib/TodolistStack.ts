@@ -32,7 +32,7 @@ export class TodolistStack extends cdk.Stack {
     const todosLambda = new lambda.Function(this, "TodoListHandler", {
       functionName: "TodosLambda",
       handler: "lambda_todolist.lambda_handler",
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_10,
       code: lambda.Code.fromAsset("../services/"),
       role: todostableiamrole,
     });

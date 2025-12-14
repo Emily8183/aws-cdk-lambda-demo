@@ -12,7 +12,7 @@ export class LambdaApiGatewayStack extends cdk.Stack {
     // 创建 Lambda 函数，this 指当前 Stack，也就是 LambdaApiGatewayStack 的实例。
     const myLambda = new lambda.Function(this, "MyLambdaFunction", {
       handler: "lambda_function.lambda_handler",
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_10,
       code: lambda.Code.fromAsset("../services/"),
       functionName: "demolambdagateway",
     });

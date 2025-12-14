@@ -33,7 +33,7 @@ export class S3triggerlambdawritesdb extends cdk.Stack {
     //lambda function
     const retaillambda = new lambda.Function(this, "retaillambdalogicalid", {
       handler: "lambda_sample3.lambda_handler",
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_10,
       code: lambda.Code.fromAsset("../services/"),
       role: retailfeediamrole,
       functionName: "demos3triggerlambdawritesdb",

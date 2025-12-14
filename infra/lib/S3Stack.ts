@@ -35,7 +35,7 @@ export class S3Stack extends cdk.Stack {
       "lambdas3logcialid",
       {
         handler: "lambda_s3handler.lambda_handler", //must be a string
-        runtime: lambda.Runtime.PYTHON_3_9,
+        runtime: lambda.Runtime.PYTHON_3_10,
         code: lambda.Code.fromAsset("../services/"), //从本地路径中 打包 Lambda 函数的代码，并上传到 AWS
         role: iambalancestatusrole,
       }

@@ -12,7 +12,7 @@ export class LambdafunctionDemoStack extends cdk.Stack {
     // lambda function
     const demolambda = new lambda.Function(this, "demologicalid", {
       handler: "lambda_function.lambda_handler",
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_10,
       code: lambda.Code.fromAsset("../services/"),
       functionName: "democdklambda",
     });
